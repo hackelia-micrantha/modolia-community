@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hackelia-micrantha/modolia-community/blob/main/schemas/route-resolution-record.schema.json",
+  "title": "Route Resolution Record",
+  "description": "Content-addressed integrity record binding exact normalized resolver inputs to a RouteDecision. Integrity does not imply publisher trust or execution authorization.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "canonicalization", "record_id", "resolution_sha256", "request_id", "resolver_version", "constraints_version", "source_registry_version", "request_sha256", "constraints_sha256", "registry_sha256", "decision_sha256", "decision"],
+  "properties": {
+    "schema_version": {"type": "string", "const": "0.1.0"},
+    "canonicalization": {"type": "string", "const": "model-router-canonical-json-v1"},
+    "record_id": {"type": "string", "pattern": "^route-resolution:sha256:[a-f0-9]{64}$"},
+    "resolution_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "request_id": {"type": "string", "minLength": 1}, "resolver_version": {"type": "string", "minLength": 1}, "constraints_version": {"type": "string", "minLength": 1}, "source_registry_version": {"type": "string", "minLength": 1},
+    "request_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "constraints_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "registry_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "decision_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "decision": {"$ref": "route-decision.schema.json"}
+  }
+}

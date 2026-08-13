@@ -1,0 +1,9 @@
+{
+  "schema_version": "0.1.0",
+  "request_id": "example-private-review",
+  "privacy_class": "local_only",
+  "data_classes": ["private_source_code"],
+  "residency_requirement": "local_required",
+  "remote_allowed": false,
+  "minimum_quality_tier": "reviewer"
+}

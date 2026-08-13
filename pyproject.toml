@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "modolia"
+version = "0.1.0"
+description = "Deterministic, host-independent model-surface resolution"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+dependencies = []
+
+[project.optional-dependencies]
+validation = ["jsonschema>=4.18,<5", "PyYAML>=6,<7"]
+test = ["pytest>=8,<10"]
+
+[tool.setuptools.packages.find]
+include = ["model_router*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
