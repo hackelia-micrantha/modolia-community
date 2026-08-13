@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hackelia-micrantha/modolia-community/blob/main/schemas/route-decision.schema.json",
+  "title": "Route Decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["request_id", "timestamp", "constraints_version", "resolver_version", "source_registry_version", "task", "required_capabilities", "privacy_class", "data_classes", "residency_requirement", "remote_allowed", "decision_outcome", "selected_source", "candidate_sources", "eligible_sources", "ranked_sources", "rejected_sources", "rejection_details", "policy_denials", "decision_reasons", "fallback_policy"],
+  "properties": {
+    "request_id": {"type": "string", "minLength": 1}, "timestamp": {"type": "string", "format": "date-time"},
+    "constraints_version": {"type": "string", "minLength": 1}, "resolver_version": {"type": "string", "minLength": 1}, "source_registry_version": {"type": "string", "minLength": 1},
+    "task": {"type": "string", "minLength": 1}, "required_capabilities": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "quality_tier": {"type": "string", "enum": ["cheap", "balanced", "strong", "reviewer", "final_answer"]},
+    "privacy_class": {"type": "string", "enum": ["local_only", "trusted_cloud_ok", "public_cloud_ok", "unknown"]},
+    "data_classes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "residency_requirement": {"type": "string", "enum": ["local_required", "ca_required_when_remote", "ca_preferred", "no_requirement", "unknown"]},
+    "remote_allowed": {"type": "boolean"}, "remote_allowance_reasons": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "decision_outcome": {"type": "string", "enum": ["selected", "denied"]}, "affinity_key": {"type": "string", "minLength": 1},
+    "selected_source": {"type": ["string", "null"]},
+    "candidate_sources": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "eligible_sources": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "ranked_sources": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "rejected_sources": {"type": "object", "additionalProperties": {"type": "array", "items": {"type": "string", "minLength": 1}}},
+    "rejection_details": {"type": "object", "additionalProperties": {"type": "array", "items": {"$ref": "#/$defs/rejection"}}},
+    "policy_denials": {"type": "array", "items": {"$ref": "#/$defs/policy_denial"}},
+    "decision_reasons": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "fallback_policy": {
+      "type": "object", "additionalProperties": false, "required": ["allowed_reasons", "forbidden_reasons"],
+      "properties": {"allowed_reasons": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}, "forbidden_reasons": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}}
+    },
+    "token_estimate": {"type": "object", "additionalProperties": false, "properties": {"input": {"type": "integer", "minimum": 0}, "max_output": {"type": "integer", "minimum": 0}}}
+  },
+  "$defs": {
+    "rejection": {"type": "object", "additionalProperties": false, "required": ["code", "reason"], "properties": {"code": {"type": "string"}, "reason": {"type": "string", "minLength": 1}}},
+    "policy_denial": {"type": "object", "additionalProperties": false, "required": ["code", "reason"], "properties": {"code": {"type": "string"}, "reason": {"type": "string", "minLength": 1}, "source": {"type": "string"}}}
+  },
+  "allOf": [
+    {"if": {"properties": {"decision_outcome": {"const": "selected"}}, "required": ["decision_outcome"]}, "then": {"properties": {"selected_source": {"type": "string", "minLength": 1}, "policy_denials": {"maxItems": 0}, "eligible_sources": {"minItems": 1}, "ranked_sources": {"minItems": 1}}}},
+    {"if": {"properties": {"decision_outcome": {"const": "denied"}}, "required": ["decision_outcome"]}, "then": {"properties": {"selected_source": {"type": "null"}, "remote_allowed": {"const": false}, "policy_denials": {"minItems": 1}, "eligible_sources": {"maxItems": 0}, "ranked_sources": {"maxItems": 0}, "fallback_policy": {"properties": {"allowed_reasons": {"maxItems": 0}}}}}}
+  ]
+}
