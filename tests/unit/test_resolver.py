@@ -147,3 +147,94 @@ def test_duplicate_source_ids_fail_closed() -> None:
     reg["sources"] = [reg["sources"][0], copy.deepcopy(reg["sources"][0])]
     with pytest.raises(ResolutionError, match="duplicate source id"):
         resolve(request(), local_constraints(), reg)
+
+
+def test_request_and_constraint_identity_must_match() -> None:
+    with pytest.raises(ResolutionError, match="request_id must match"):
+        resolve(request("request-a"), local_constraints("request-b"), registry())
+
+
+def test_overlapping_source_allow_and_deny_lists_fail_closed() -> None:
+    constraints = local_constraints()
+    constraints["allowed_sources"] = ["local-reviewer"]
+    constraints["forbidden_sources"] = ["local-reviewer"]
+    with pytest.raises(ResolutionError, match="allowed_sources and forbidden_sources overlap"):
+        resolve(request(), constraints, registry())
+
+
+def test_unknown_preferred_source_fails_closed() -> None:
+    req = request()
+    req["preferred_sources"] = ["missing-source"]
+    with pytest.raises(ResolutionError, match="preferred_sources references unknown sources"):
+        resolve(req, local_constraints(), registry())
+
+
+def test_disabled_source_is_rejected_before_policy_evaluation() -> None:
+    reg = registry()
+    local = reg["sources"][0]
+    local["enabled"] = False
+    decision = resolve(request(), local_constraints(), reg)
+    assert decision["decision_outcome"] == "denied"
+    assert decision["rejection_details"]["local-reviewer"][0]["code"] == "source_disabled"
+
+
+def test_missing_capability_and_context_overflow_are_rejected() -> None:
+    req = request()
+    req["required_capabilities"] = ["vision"]
+    req["context_estimate"] = {"input_tokens": 40000, "max_output_tokens": 1000}
+    decision = resolve(req, local_constraints(), registry())
+    codes = {item["code"] for item in decision["rejection_details"]["local-reviewer"]}
+    assert "missing_capability" in codes
+    assert "context_capacity_exceeded" in codes
+
+
+def test_numeric_hard_budget_uses_versioned_pricing_and_fails_closed() -> None:
+    reg = registry()
+    cloud = reg["sources"][1]
+    cloud["pricing"] = {
+        "currency": "USD",
+        "input_per_million": 2.0,
+        "output_per_million": 8.0,
+    }
+    reg["sources"] = [cloud]
+    constraints = cloud_constraints()
+    constraints["hard_budget"] = {"max_cost_usd": 0.000001}
+    decision = resolve(request(), constraints, reg)
+    assert decision["decision_outcome"] == "denied"
+    assert decision["policy_denials"][0]["code"] == "budget_hard_limit"
+
+
+def test_operational_fallback_is_exposed_only_with_multiple_eligible_sources() -> None:
+    constraints = cloud_constraints()
+    constraints["operational_fallback"] = {
+        "allowed_reasons": ["temporary_unavailable"],
+        "forbidden_reasons": ["policy_denial"],
+    }
+    decision = resolve(request(), constraints, registry())
+    assert decision["fallback_policy"] == {
+        "allowed_reasons": ["temporary_unavailable"],
+        "forbidden_reasons": ["policy_denial"],
+    }
+
+
+def test_resolution_record_rejects_identity_and_replay_drift() -> None:
+    req = request()
+    constraints = local_constraints()
+    reg = registry()
+    decision = resolve(req, constraints, reg)
+
+    invalid_decision = copy.deepcopy(decision)
+    invalid_decision["request_id"] = "other"
+    with pytest.raises(IntegrityError, match="decision request_id"):
+        build_resolution_record(req, constraints, reg, invalid_decision)
+
+    record = build_resolution_record(req, constraints, reg, decision)
+    modified_record = copy.deepcopy(record)
+    modified_record["resolution_sha256"] = "0" * 64
+    with pytest.raises(IntegrityError, match="resolution identity digest mismatch"):
+        verify_record_integrity(modified_record)
+
+    changed_request = copy.deepcopy(req)
+    changed_request["task"] = "summarize"
+    with pytest.raises(IntegrityError, match="request drift"):
+        replay_resolution(record, changed_request, constraints, reg)
