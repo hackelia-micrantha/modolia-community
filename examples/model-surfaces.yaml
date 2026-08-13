@@ -1,0 +1,44 @@
+version: 0.1.0
+sources:
+  - id: local-reviewer
+    provider: local-runtime
+    model: example-reviewer
+    privacy_boundary: local
+    residency_boundary: local
+    capabilities: [reasoning, code_review]
+    context_tokens: 32768
+    quality_tier: reviewer
+    cost_class: free
+
+  - id: trusted-cloud-reviewer
+    provider: example-cloud
+    model: example-cloud-reviewer
+    privacy_boundary: trusted_cloud
+    residency_boundary: ca
+    remote_allowance:
+      allowed: true
+      requires_approval: true
+      allowed_privacy_classes: [trusted_cloud_ok, public_cloud_ok]
+      evidence_required: [approval, data_classification]
+    capabilities: [reasoning, code_review]
+    context_tokens: 128000
+    quality_tier: reviewer
+    cost_class: medium
+    pricing:
+      currency: USD
+      input_per_million: 2.0
+      output_per_million: 8.0
+      last_reviewed: "2026-01-01"
+
+  - id: public-utility
+    provider: example-public-cloud
+    model: example-utility
+    privacy_boundary: public_cloud
+    residency_boundary: global
+    remote_allowance:
+      allowed: true
+      allowed_privacy_classes: [public_cloud_ok]
+    capabilities: [summarize, rewrite]
+    context_tokens: 16384
+    quality_tier: cheap
+    cost_class: low
