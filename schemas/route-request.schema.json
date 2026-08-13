@@ -5,42 +5,164 @@
   "description": "Provider-independent task facts and preferences used for model-route resolution. Authority-bearing routing restrictions belong in RouteConstraints.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["request_id", "timestamp", "task"],
+  "required": [
+    "request_id",
+    "timestamp",
+    "task"
+  ],
   "properties": {
-    "request_id": {"type": "string", "minLength": 1},
-    "timestamp": {"type": "string", "format": "date-time"},
-    "task": {"type": "string", "minLength": 1},
-    "logical_role": {"type": "string", "minLength": 1},
-    "required_capabilities": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-    "context_estimate": {
-      "type": "object", "additionalProperties": false,
-      "properties": {"input_tokens": {"type": "integer", "minimum": 0}, "max_output_tokens": {"type": "integer", "minimum": 0}}
+    "request_id": { "type": "string", "minLength": 1 },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "task": { "type": "string", "minLength": 1 },
+    "logical_role": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional host-defined logical model role. Specialist-role selection itself remains a host/orchestrator concern."
     },
-    "latency_tolerance": {"type": "string", "enum": ["interactive", "normal", "batch", "unknown"]},
-    "cost_preference": {"type": "string", "enum": ["prefer_free", "prefer_low", "no_preference"]},
-    "preferred_sources": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-    "affinity_key": {"type": "string", "minLength": 1},
-    "session_id": {"type": "string", "minLength": 1},
-    "external_execution_id": {"type": "string", "minLength": 1},
-    "metadata": {"type": "object", "additionalProperties": {"type": ["string", "number", "integer", "boolean", "null"]}},
-    "quality_tier": {"type": "string", "enum": ["cheap", "balanced", "strong", "reviewer", "final_answer"], "deprecated": true},
-    "budget_tolerance": {"type": "string", "enum": ["free_only", "low", "medium", "high", "unknown"], "deprecated": true},
-    "classification": {"$ref": "classification.schema.json", "deprecated": true},
-    "residency_requirement": {"type": "string", "enum": ["local_required", "ca_required_when_remote", "ca_preferred", "no_requirement", "unknown"], "deprecated": true},
-    "remote_allowed": {"type": "boolean", "deprecated": true},
-    "remote_allowance_reasons": {"type": "array", "items": {"type": "string", "minLength": 1}, "deprecated": true},
-    "forbidden_sources": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}, "deprecated": true},
-    "approval_evidence": {"$ref": "#/$defs/evidence_ref", "deprecated": true},
-    "secret_scan_evidence": {"$ref": "#/$defs/evidence_ref", "deprecated": true}
+    "required_capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Capabilities intrinsic to completing the requested task."
+    },
+    "context_estimate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "input_tokens": { "type": "integer", "minimum": 0 },
+        "max_output_tokens": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "latency_tolerance": {
+      "type": "string",
+      "enum": ["interactive", "normal", "batch", "unknown"],
+      "description": "Task/runtime preference, not authorization to widen eligibility."
+    },
+    "cost_preference": {
+      "type": "string",
+      "enum": ["prefer_free", "prefer_low", "no_preference"],
+      "description": "Soft cost-ranking preference only. Hard cost restrictions belong in RouteConstraints.hard_budget."
+    },
+    "preferred_sources": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Soft ordered source preference. It can rank only already-eligible sources and never grants eligibility."
+    },
+    "affinity_key": { "type": "string", "minLength": 1 },
+    "session_id": { "type": "string", "minLength": 1 },
+    "external_execution_id": { "type": "string", "minLength": 1 },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": {
+        "type": ["string", "number", "integer", "boolean", "null"]
+      }
+    },
+    "quality_tier": {
+      "type": "string",
+      "enum": ["cheap", "balanced", "strong", "reviewer", "final_answer"],
+      "deprecated": true,
+      "description": "Migration-only field retained for existing evaluator/examples. Use RouteConstraints.minimum_quality_tier for authority-bearing minimum quality."
+    },
+    "budget_tolerance": {
+      "type": "string",
+      "enum": ["free_only", "low", "medium", "high", "unknown"],
+      "deprecated": true,
+      "description": "Migration-only mixed-semantics field retained for evaluator compatibility. New requests use cost_preference for soft ranking and RouteConstraints.hard_budget for hard restrictions."
+    },
+    "classification": {
+      "$ref": "classification.schema.json",
+      "deprecated": true,
+      "description": "Migration-only caller claim. Trusted privacy/data restrictions belong in RouteConstraints."
+    },
+    "residency_requirement": {
+      "type": "string",
+      "enum": ["local_required", "ca_required_when_remote", "ca_preferred", "no_requirement", "unknown"],
+      "deprecated": true,
+      "description": "Migration-only authority field. Use RouteConstraints.residency_requirement."
+    },
+    "remote_allowed": {
+      "type": "boolean",
+      "deprecated": true,
+      "description": "Migration-only authority field. Use RouteConstraints.remote_allowed."
+    },
+    "remote_allowance_reasons": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "deprecated": true,
+      "description": "Migration-only authority metadata. Use RouteConstraints.remote_allowance_reasons."
+    },
+    "forbidden_sources": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 },
+      "deprecated": true,
+      "description": "Migration-only source restriction. Use RouteConstraints.forbidden_sources."
+    },
+    "approval_evidence": {
+      "$ref": "#/$defs/evidence_ref",
+      "deprecated": true,
+      "description": "Migration-only evidence claim. Trusted evidence facts belong in RouteConstraints."
+    },
+    "secret_scan_evidence": {
+      "$ref": "#/$defs/evidence_ref",
+      "deprecated": true,
+      "description": "Migration-only evidence claim. Trusted evidence facts belong in RouteConstraints."
+    }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "classification": {
+            "properties": { "privacy_class": { "const": "local_only" } },
+            "required": ["privacy_class"]
+          }
+        },
+        "required": ["classification"]
+      },
+      "then": {
+        "properties": {
+          "remote_allowed": { "const": false },
+          "residency_requirement": { "const": "local_required" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "residency_requirement": { "const": "local_required" } },
+        "required": ["residency_requirement"]
+      },
+      "then": {
+        "properties": { "remote_allowed": { "const": false } }
+      }
+    },
+    {
+      "if": {
+        "properties": { "remote_allowed": { "const": true } },
+        "required": ["remote_allowed"]
+      },
+      "then": {
+        "required": ["remote_allowance_reasons"],
+        "properties": {
+          "remote_allowance_reasons": { "minItems": 1 }
+        }
+      }
+    }
+  ],
   "$defs": {
     "evidence_ref": {
-      "type": "object", "additionalProperties": false, "required": ["status"],
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
       "properties": {
-        "status": {"type": "string", "enum": ["not_required", "present", "missing", "failed", "unknown"]},
-        "reference": {"type": "string", "minLength": 1},
-        "checked_at": {"type": "string", "format": "date-time"},
-        "notes": {"type": "array", "items": {"type": "string"}}
+        "status": {
+          "type": "string",
+          "enum": ["not_required", "present", "missing", "failed", "unknown"]
+        },
+        "reference": { "type": "string", "minLength": 1 },
+        "checked_at": { "type": "string", "format": "date-time" },
+        "notes": { "type": "array", "items": { "type": "string" } }
       }
     }
   }
