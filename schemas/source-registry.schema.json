@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hackelia-micrantha/modolia-community/blob/main/schemas/source-registry.schema.json",
+  "title": "Model Surface Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "sources"],
+  "properties": {
+    "version": {"type": "string", "minLength": 1},
+    "sources": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/source"}}
+  },
+  "$defs": {
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "provider", "model", "privacy_boundary", "residency_boundary", "capabilities", "quality_tier", "cost_class"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1}, "lane": {"type": "string", "minLength": 1}, "provider": {"type": "string", "minLength": 1}, "model": {"type": "string", "minLength": 1}, "plano_alias": {"type": "string", "minLength": 1},
+        "privacy_boundary": {"type": "string", "enum": ["local", "trusted_cloud", "public_cloud"]},
+        "residency_boundary": {"type": "string", "enum": ["local", "ca", "us", "eu", "global", "unknown"]},
+        "remote_allowance": {"$ref": "#/$defs/remote_allowance"},
+        "capabilities": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "context_tokens": {"type": "integer", "minimum": 1},
+        "quality_tier": {"type": "string", "enum": ["cheap", "balanced", "strong", "reviewer", "final_answer"]},
+        "cost_class": {"type": "string", "enum": ["free", "low", "medium", "high", "unknown"]},
+        "pricing": {"$ref": "#/$defs/pricing"}, "fallback_group": {"type": "string", "minLength": 1},
+        "risk_notes": {"type": "array", "items": {"type": "string"}}, "enabled": {"type": "boolean", "default": true}
+      }
+    },
+    "remote_allowance": {
+      "type": "object", "additionalProperties": false, "required": ["allowed"],
+      "properties": {
+        "allowed": {"type": "boolean"}, "requires_approval": {"type": "boolean"},
+        "allowed_privacy_classes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "enum": ["trusted_cloud_ok", "public_cloud_ok"]}},
+        "evidence_required": {"type": "array", "uniqueItems": true, "items": {"type": "string", "enum": ["approval", "secret_scan", "data_classification", "residency_review", "budget_review"]}}
+      }
+    },
+    "pricing": {
+      "type": "object", "additionalProperties": false,
+      "properties": {"currency": {"type": "string", "minLength": 3, "maxLength": 3}, "input_per_million": {"type": "number", "minimum": 0}, "output_per_million": {"type": "number", "minimum": 0}, "cached_input_per_million": {"type": "number", "minimum": 0}, "last_reviewed": {"type": "string", "format": "date"}}
+    }
+  }
+}
