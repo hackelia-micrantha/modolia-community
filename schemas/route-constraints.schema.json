@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hackelia-micrantha/modolia-community/blob/main/schemas/route-constraints.schema.json",
+  "title": "Route Constraints",
+  "description": "Trusted routing restrictions established by an embedding host. Schema validation does not authenticate the producer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "request_id", "privacy_class", "data_classes", "residency_requirement", "remote_allowed"],
+  "properties": {
+    "schema_version": {"type": "string", "const": "0.1.0"},
+    "request_id": {"type": "string", "minLength": 1},
+    "privacy_class": {"type": "string", "enum": ["local_only", "trusted_cloud_ok", "public_cloud_ok", "unknown"]},
+    "data_classes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["private_source_code", "cloud_allowed_source_code", "public_source_code", "secrets", "unpublished_docs", "cloud_allowed_work_docs", "canadian_sensitive_docs", "sensitive_personal_data", "public_content", "unknown"]}},
+    "residency_requirement": {"type": "string", "enum": ["local_required", "ca_required_when_remote", "ca_preferred", "no_requirement", "unknown"]},
+    "remote_allowed": {"type": "boolean"},
+    "remote_allowance_reasons": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "allowed_sources": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "forbidden_sources": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "minimum_quality_tier": {"type": "string", "enum": ["cheap", "balanced", "strong", "reviewer", "final_answer"]},
+    "hard_budget": {
+      "type": "object", "additionalProperties": false, "minProperties": 1,
+      "properties": {
+        "max_cost_usd": {"type": "number", "minimum": 0},
+        "allowed_cost_classes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "enum": ["free", "low", "medium", "high", "unknown"]}}
+      }
+    },
+    "operational_fallback": {
+      "type": "object", "additionalProperties": false, "required": ["allowed_reasons", "forbidden_reasons"],
+      "properties": {
+        "allowed_reasons": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/operational_fallback_reason"}},
+        "forbidden_reasons": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/forbidden_fallback_reason"}}
+      }
+    },
+    "required_evidence": {"type": "array", "uniqueItems": true, "items": {"type": "string", "enum": ["approval", "secret_scan", "data_classification", "residency_review", "budget_review"]}},
+    "evidence": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "approval": {"$ref": "#/$defs/evidence_fact"}, "secret_scan": {"$ref": "#/$defs/evidence_fact"},
+        "data_classification": {"$ref": "#/$defs/evidence_fact"}, "residency_review": {"$ref": "#/$defs/evidence_fact"}, "budget_review": {"$ref": "#/$defs/evidence_fact"}
+      }
+    },
+    "policy_references": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "metadata": {"type": "object", "additionalProperties": {"type": ["string", "number", "integer", "boolean", "null"]}}
+  },
+  "allOf": [
+    {"if": {"properties": {"privacy_class": {"enum": ["local_only", "unknown"]}}, "required": ["privacy_class"]}, "then": {"properties": {"remote_allowed": {"const": false}, "residency_requirement": {"const": "local_required"}}}},
+    {"if": {"properties": {"data_classes": {"contains": {"enum": ["private_source_code", "secrets", "unpublished_docs", "sensitive_personal_data", "unknown"]}}}, "required": ["data_classes"]}, "then": {"properties": {"privacy_class": {"const": "local_only"}, "remote_allowed": {"const": false}, "residency_requirement": {"const": "local_required"}}}},
+    {"if": {"properties": {"residency_requirement": {"const": "local_required"}}, "required": ["residency_requirement"]}, "then": {"properties": {"remote_allowed": {"const": false}}}},
+    {"if": {"properties": {"remote_allowed": {"const": true}}, "required": ["remote_allowed"]}, "then": {"required": ["remote_allowance_reasons"], "properties": {"privacy_class": {"enum": ["trusted_cloud_ok", "public_cloud_ok"]}, "remote_allowance_reasons": {"minItems": 1}}}}
+  ],
+  "$defs": {
+    "operational_fallback_reason": {"type": "string", "enum": ["timeout", "rate_limited", "provider_5xx", "transient_network_failure", "invalid_structured_output_after_retry"]},
+    "forbidden_fallback_reason": {"type": "string", "enum": ["privacy_violation", "forbidden_provider", "budget_hard_limit", "safety_policy_denial", "missing_approval_gate", "secret_scan_failed", "residency_violation", "unknown_classification", "unknown_source_quality"]},
+    "evidence_fact": {
+      "type": "object", "additionalProperties": false, "required": ["verified"],
+      "properties": {"verified": {"type": "boolean"}, "reference": {"type": "string", "minLength": 1}, "verified_at": {"type": "string", "format": "date-time"}, "notes": {"type": "array", "items": {"type": "string"}}},
+      "allOf": [{"if": {"properties": {"verified": {"const": true}}, "required": ["verified"]}, "then": {"required": ["reference"]}}]
+    }
+  }
+}
