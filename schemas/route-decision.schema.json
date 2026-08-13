@@ -4,37 +4,320 @@
   "title": "Route Decision",
   "type": "object",
   "additionalProperties": false,
-  "required": ["request_id", "timestamp", "constraints_version", "resolver_version", "source_registry_version", "task", "required_capabilities", "privacy_class", "data_classes", "residency_requirement", "remote_allowed", "decision_outcome", "selected_source", "candidate_sources", "eligible_sources", "ranked_sources", "rejected_sources", "rejection_details", "policy_denials", "decision_reasons", "fallback_policy"],
+  "required": [
+    "request_id",
+    "timestamp",
+    "task",
+    "privacy_class",
+    "data_classes",
+    "residency_requirement",
+    "remote_allowed",
+    "decision_outcome",
+    "selected_source",
+    "candidate_sources",
+    "rejected_sources",
+    "policy_denials",
+    "decision_reasons"
+  ],
   "properties": {
-    "request_id": {"type": "string", "minLength": 1}, "timestamp": {"type": "string", "format": "date-time"},
-    "constraints_version": {"type": "string", "minLength": 1}, "resolver_version": {"type": "string", "minLength": 1}, "source_registry_version": {"type": "string", "minLength": 1},
-    "task": {"type": "string", "minLength": 1}, "required_capabilities": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-    "quality_tier": {"type": "string", "enum": ["cheap", "balanced", "strong", "reviewer", "final_answer"]},
-    "privacy_class": {"type": "string", "enum": ["local_only", "trusted_cloud_ok", "public_cloud_ok", "unknown"]},
-    "data_classes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
-    "residency_requirement": {"type": "string", "enum": ["local_required", "ca_required_when_remote", "ca_preferred", "no_requirement", "unknown"]},
-    "remote_allowed": {"type": "boolean"}, "remote_allowance_reasons": {"type": "array", "items": {"type": "string", "minLength": 1}},
-    "decision_outcome": {"type": "string", "enum": ["selected", "denied"]}, "affinity_key": {"type": "string", "minLength": 1},
-    "selected_source": {"type": ["string", "null"]},
-    "candidate_sources": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-    "eligible_sources": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-    "ranked_sources": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-    "rejected_sources": {"type": "object", "additionalProperties": {"type": "array", "items": {"type": "string", "minLength": 1}}},
-    "rejection_details": {"type": "object", "additionalProperties": {"type": "array", "items": {"$ref": "#/$defs/rejection"}}},
-    "policy_denials": {"type": "array", "items": {"$ref": "#/$defs/policy_denial"}},
-    "decision_reasons": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-    "fallback_policy": {
-      "type": "object", "additionalProperties": false, "required": ["allowed_reasons", "forbidden_reasons"],
-      "properties": {"allowed_reasons": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}, "forbidden_reasons": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}}
+    "request_id": { "type": "string", "minLength": 1 },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "policy_version": {
+      "type": "string",
+      "deprecated": true,
+      "description": "Legacy policy-profile version retained for compatibility decisions. New resolver decisions use constraints_version and resolver_version."
     },
-    "token_estimate": {"type": "object", "additionalProperties": false, "properties": {"input": {"type": "integer", "minimum": 0}, "max_output": {"type": "integer", "minimum": 0}}}
+    "constraints_version": { "type": "string", "minLength": 1 },
+    "resolver_version": { "type": "string", "minLength": 1 },
+    "source_registry_version": { "type": "string", "minLength": 1 },
+    "task": { "type": "string", "minLength": 1 },
+    "required_capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Task capabilities that every resolver-eligible source was required to satisfy."
+    },
+    "quality_tier": {
+      "type": "string",
+      "enum": ["cheap", "balanced", "strong", "reviewer", "final_answer"]
+    },
+    "privacy_class": {
+      "type": "string",
+      "enum": ["local_only", "trusted_cloud_ok", "public_cloud_ok", "unknown"]
+    },
+    "data_classes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "private_source_code",
+          "cloud_allowed_source_code",
+          "public_source_code",
+          "secrets",
+          "unpublished_docs",
+          "cloud_allowed_work_docs",
+          "canadian_sensitive_docs",
+          "sensitive_personal_data",
+          "public_content",
+          "unknown"
+        ]
+      }
+    },
+    "residency_requirement": {
+      "type": "string",
+      "enum": ["local_required", "ca_required_when_remote", "ca_preferred", "no_requirement", "unknown"]
+    },
+    "remote_allowed": {
+      "type": "boolean",
+      "description": "Whether the resolved decision permits remote execution. Denied decisions are always false."
+    },
+    "remote_allowance_reasons": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "decision_outcome": { "type": "string", "enum": ["selected", "denied"] },
+    "approval_reference": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Legacy optional approval identifier."
+    },
+    "approval_evidence": { "$ref": "#/$defs/evidence_ref" },
+    "secret_scan_evidence": { "$ref": "#/$defs/evidence_ref" },
+    "affinity_key": { "type": "string", "minLength": 1 },
+    "selected_source": { "type": ["string", "null"] },
+    "candidate_sources": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "eligible_sources": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "description": "Sources that passed all hard constraints before ranking."
+    },
+    "ranked_sources": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "description": "Eligible sources ordered by deterministic preference/ranking."
+    },
+    "rejected_sources": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string", "minLength": 1 }
+      }
+    },
+    "rejection_details": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "$ref": "#/$defs/rejection" }
+      }
+    },
+    "policy_denials": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/policy_denial" }
+    },
+    "decision_reasons": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "fallback_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed_reasons", "forbidden_reasons"],
+      "properties": {
+        "allowed_reasons": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/operational_fallback_reason" }
+        },
+        "forbidden_reasons": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/forbidden_fallback_reason" }
+        }
+      },
+      "description": "Resolver-carried host fallback bounds for downstream runtime adapters. These bounds never make rejected sources eligible."
+    },
+    "fallbacks": {
+      "type": "array",
+      "deprecated": true,
+      "description": "Legacy explicit fallback transitions retained for compatibility decisions.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to", "reason"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "token_estimate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "input": { "type": "integer", "minimum": 0 },
+        "max_output": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "input_tokens": { "type": "integer", "minimum": 0 },
+        "output_tokens": { "type": "integer", "minimum": 0 },
+        "latency_ms": { "type": "integer", "minimum": 0 },
+        "cost_usd": { "type": "number", "minimum": 0 }
+      }
+    }
   },
   "$defs": {
-    "rejection": {"type": "object", "additionalProperties": false, "required": ["code", "reason"], "properties": {"code": {"type": "string"}, "reason": {"type": "string", "minLength": 1}}},
-    "policy_denial": {"type": "object", "additionalProperties": false, "required": ["code", "reason"], "properties": {"code": {"type": "string"}, "reason": {"type": "string", "minLength": 1}, "source": {"type": "string"}}}
+    "operational_fallback_reason": {
+      "type": "string",
+      "enum": [
+        "timeout",
+        "rate_limited",
+        "provider_5xx",
+        "transient_network_failure",
+        "invalid_structured_output_after_retry"
+      ]
+    },
+    "forbidden_fallback_reason": {
+      "type": "string",
+      "enum": [
+        "privacy_violation",
+        "forbidden_provider",
+        "budget_hard_limit",
+        "safety_policy_denial",
+        "missing_approval_gate",
+        "secret_scan_failed",
+        "residency_violation",
+        "unknown_classification",
+        "unknown_source_quality"
+      ]
+    },
+    "evidence_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["not_required", "present", "missing", "failed", "unknown"]
+        },
+        "reference": { "type": "string" },
+        "checked_at": { "type": "string", "format": "date-time" },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "rejection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "reason"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "source_disabled",
+            "source_not_allowed",
+            "forbidden_provider",
+            "privacy_violation",
+            "remote_execution_forbidden",
+            "source_remote_disabled",
+            "residency_violation",
+            "missing_approval_gate",
+            "secret_scan_failed",
+            "unknown_classification",
+            "evidence_requirement_unsatisfied",
+            "missing_capability",
+            "context_capacity_exceeded",
+            "quality_requirement_unsatisfied",
+            "budget_hard_limit"
+          ]
+        },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "policy_denial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "reason"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "privacy_violation",
+            "forbidden_provider",
+            "budget_hard_limit",
+            "safety_policy_denial",
+            "missing_approval_gate",
+            "secret_scan_failed",
+            "residency_violation",
+            "unknown_classification",
+            "unknown_source_quality"
+          ]
+        },
+        "reason": { "type": "string", "minLength": 1 },
+        "source": { "type": "string" }
+      }
+    }
   },
+  "anyOf": [
+    { "required": ["policy_version"] },
+    { "required": ["constraints_version", "resolver_version", "source_registry_version", "required_capabilities", "eligible_sources", "ranked_sources", "fallback_policy"] }
+  ],
   "allOf": [
-    {"if": {"properties": {"decision_outcome": {"const": "selected"}}, "required": ["decision_outcome"]}, "then": {"properties": {"selected_source": {"type": "string", "minLength": 1}, "policy_denials": {"maxItems": 0}, "eligible_sources": {"minItems": 1}, "ranked_sources": {"minItems": 1}}}},
-    {"if": {"properties": {"decision_outcome": {"const": "denied"}}, "required": ["decision_outcome"]}, "then": {"properties": {"selected_source": {"type": "null"}, "remote_allowed": {"const": false}, "policy_denials": {"minItems": 1}, "eligible_sources": {"maxItems": 0}, "ranked_sources": {"maxItems": 0}, "fallback_policy": {"properties": {"allowed_reasons": {"maxItems": 0}}}}}}
+    {
+      "if": { "properties": { "decision_outcome": { "const": "selected" } }, "required": ["decision_outcome"] },
+      "then": {
+        "properties": {
+          "selected_source": { "type": "string", "minLength": 1 },
+          "policy_denials": { "maxItems": 0 },
+          "eligible_sources": { "minItems": 1 },
+          "ranked_sources": { "minItems": 1 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "decision_outcome": { "const": "denied" } }, "required": ["decision_outcome"] },
+      "then": {
+        "properties": {
+          "selected_source": { "type": "null" },
+          "remote_allowed": { "const": false },
+          "policy_denials": { "minItems": 1 },
+          "eligible_sources": { "maxItems": 0 },
+          "ranked_sources": { "maxItems": 0 },
+          "fallback_policy": {
+            "properties": { "allowed_reasons": { "maxItems": 0 } }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "remote_allowed": { "const": true } }, "required": ["remote_allowed"] },
+      "then": {
+        "properties": {
+          "privacy_class": { "enum": ["trusted_cloud_ok", "public_cloud_ok"] },
+          "remote_allowance_reasons": { "minItems": 1 }
+        },
+        "required": ["remote_allowance_reasons"]
+      }
+    },
+    {
+      "if": { "properties": { "privacy_class": { "enum": ["local_only", "unknown"] } }, "required": ["privacy_class"] },
+      "then": { "properties": { "remote_allowed": { "const": false } } }
+    },
+    {
+      "if": { "properties": { "privacy_class": { "const": "local_only" } }, "required": ["privacy_class"] },
+      "then": { "properties": { "residency_requirement": { "const": "local_required" } } }
+    }
   ]
 }
