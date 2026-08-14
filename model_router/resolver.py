@@ -189,9 +189,11 @@ def _estimated_cost_usd(source: dict[str, Any], request: dict[str, Any]) -> floa
     output_tokens = estimate.get("max_output_tokens")
     input_rate = pricing.get("input_per_million")
     output_rate = pricing.get("output_per_million")
-    if not all(
-        isinstance(value, (int, float))
-        for value in (input_tokens, output_tokens, input_rate, output_rate)
+    if not (
+        isinstance(input_tokens, (int, float))
+        and isinstance(output_tokens, (int, float))
+        and isinstance(input_rate, (int, float))
+        and isinstance(output_rate, (int, float))
     ):
         return None
 
@@ -318,7 +320,9 @@ def _source_rejections(
     if isinstance(minimum_quality, str):
         source_quality = source.get("quality_tier")
         minimum_rank = QUALITY_RANK.get(minimum_quality)
-        source_rank = QUALITY_RANK.get(source_quality)
+        source_rank = (
+            QUALITY_RANK.get(source_quality) if isinstance(source_quality, str) else None
+        )
         if minimum_rank is None or source_rank is None or source_rank < minimum_rank:
             _add_rejection(
                 details,
