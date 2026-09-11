@@ -11,6 +11,7 @@ import pytest
 from model_router import RESOLVER_VERSION
 
 ROOT = Path(__file__).resolve().parents[2]
+REGISTRY = ROOT / "examples" / "model-surfaces.yaml"
 
 pytestmark = pytest.mark.e2e
 
@@ -38,6 +39,24 @@ def test_resolve_route_cli_reports_package_and_resolver_versions() -> None:
     )
 
 
+def test_resolve_route_cli_requires_explicit_registry() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/resolve_route.py",
+            "examples/route-request.json",
+            "examples/route-constraints.json",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 2
+    assert "--registry" in result.stderr
+
+
 def test_resolve_route_cli_returns_public_example_decision() -> None:
     result = subprocess.run(
         [
@@ -45,6 +64,8 @@ def test_resolve_route_cli_returns_public_example_decision() -> None:
             "scripts/resolve_route.py",
             "examples/route-request.json",
             "examples/route-constraints.json",
+            "--registry",
+            str(REGISTRY),
         ],
         cwd=ROOT,
         check=False,
