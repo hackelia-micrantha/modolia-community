@@ -1,0 +1,111 @@
+{
+  "canonicalization": "model-router-canonical-json-v1",
+  "constraints_sha256": "aa3b8c98d0a470d450bd7e7c6570f0678b81d637fac114649eea00a56e6c5a51",
+  "constraints_version": "0.1.0",
+  "decision": {
+    "candidate_sources": [
+      "local-reviewer",
+      "trusted-cloud-reviewer",
+      "public-utility"
+    ],
+    "constraints_version": "0.1.0",
+    "data_classes": [
+      "private_source_code"
+    ],
+    "decision_outcome": "selected",
+    "decision_reasons": [
+      "1 of 3 sources satisfied all hard constraints",
+      "selected 'local-reviewer' as the first deterministically ranked eligible source"
+    ],
+    "eligible_sources": [
+      "local-reviewer"
+    ],
+    "fallback_policy": {
+      "allowed_reasons": [],
+      "forbidden_reasons": [
+        "privacy_violation",
+        "forbidden_provider",
+        "budget_hard_limit",
+        "safety_policy_denial",
+        "missing_approval_gate",
+        "secret_scan_failed",
+        "residency_violation",
+        "unknown_classification",
+        "unknown_source_quality"
+      ]
+    },
+    "policy_denials": [],
+    "privacy_class": "local_only",
+    "quality_tier": "reviewer",
+    "ranked_sources": [
+      "local-reviewer"
+    ],
+    "rejected_sources": {
+      "public-utility": [
+        "source boundary 'public_cloud' is not allowed for privacy class 'local_only'",
+        "RouteConstraints forbid remote execution",
+        "local_required excludes non-local residency"
+      ],
+      "trusted-cloud-reviewer": [
+        "source boundary 'trusted_cloud' is not allowed for privacy class 'local_only'",
+        "RouteConstraints forbid remote execution",
+        "local_required excludes non-local residency"
+      ]
+    },
+    "rejection_details": {
+      "public-utility": [
+        {
+          "code": "privacy_violation",
+          "reason": "source boundary 'public_cloud' is not allowed for privacy class 'local_only'"
+        },
+        {
+          "code": "remote_execution_forbidden",
+          "reason": "RouteConstraints forbid remote execution"
+        },
+        {
+          "code": "residency_violation",
+          "reason": "local_required excludes non-local residency"
+        }
+      ],
+      "trusted-cloud-reviewer": [
+        {
+          "code": "privacy_violation",
+          "reason": "source boundary 'trusted_cloud' is not allowed for privacy class 'local_only'"
+        },
+        {
+          "code": "remote_execution_forbidden",
+          "reason": "RouteConstraints forbid remote execution"
+        },
+        {
+          "code": "residency_violation",
+          "reason": "local_required excludes non-local residency"
+        }
+      ]
+    },
+    "remote_allowed": false,
+    "request_id": "example-private-review",
+    "required_capabilities": [
+      "reasoning",
+      "code_review"
+    ],
+    "residency_requirement": "local_required",
+    "resolver_version": "0.1.0",
+    "selected_source": "local-reviewer",
+    "source_registry_version": "0.1.0",
+    "task": "code_review",
+    "timestamp": "2026-01-01T00:00:00Z",
+    "token_estimate": {
+      "input": 4000,
+      "max_output": 1000
+    }
+  },
+  "decision_sha256": "362d46d319c3f7b91e8c1dbc2975efe9d9031d71b9bf10697222ecb25f4376cb",
+  "record_id": "route-resolution:sha256:4c3607bdd4940a90cde3991fb15f3d8d6b6571ef103ff9be64be5f8efc0b73ef",
+  "registry_sha256": "55044c3b67dcc781f165b8b0ab70ee9dc5b0b36a37f77f2358a0fa845fd40465",
+  "request_id": "example-private-review",
+  "request_sha256": "658935c61e41076be60739c2ca696a99c91a24b42707924c447a6a02dc778b68",
+  "resolution_sha256": "4c3607bdd4940a90cde3991fb15f3d8d6b6571ef103ff9be64be5f8efc0b73ef",
+  "resolver_version": "0.1.0",
+  "schema_version": "0.1.0",
+  "source_registry_version": "0.1.0"
+}
