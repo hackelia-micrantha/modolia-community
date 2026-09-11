@@ -9,6 +9,16 @@
 - Community extraction branch: `agent/community-core-split`
 - Community repository starts with synthetic examples and public-safe documentation; concrete deployment inventories and policy are intentionally absent.
 
+## v0.1.0 release provenance
+
+- Canonical repository: `hackelia-micrantha/modolia`
+- Canonical CLI/release-contract PR: `#86`
+- Reviewed canonical merge commit: `d5ee965153716798a690d0c2f9339b2a930d4d14`
+- Public release preparation issue: `hackelia-micrantha/modolia-community#7`
+- Public release preparation PR: `#8`
+
+The v0.1.0 public artifact promotes only the reusable resolver/CLI contract from the reviewed canonical revision. Concrete Dubnium registries, provider/runtime inventories, organization policy, credentials, generated runtime state, and private evidence remain outside the community release.
+
 ## Promotion policy
 
 Only reusable, classified material is promoted. Deployment configuration, concrete provider/runtime inventories, organization policy, generated runtime state, internal evidence, and private CI configuration remain private.

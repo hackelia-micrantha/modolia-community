@@ -25,14 +25,14 @@ Modolia Community owns the reusable mechanism:
 - route request, constraint, registry, decision, and replay contracts;
 - stable rejection reasons and fail-closed behavior;
 - content-addressed integrity/replay records;
-- offline validation and a small reference CLI;
+- offline validation and a bounded CLI;
 - synthetic examples suitable for public use.
 
 Deployment owners retain concrete configuration such as provider inventories, credentials, organization policy, runtime health, GPU/process state, and live fallback behavior.
 
 ## Quick start
 
-Requires Python 3.12+.
+Requires Python 3.12+ for library development.
 
 ```bash
 python -m pip install -e '.[validation,test]'
@@ -54,6 +54,44 @@ decision = resolve(request, constraints, registry)
 
 The historical `model_router` import package is retained in the first Modolia release for compatibility. The distribution/project name is `modolia`.
 
+## Nix CLI distribution
+
+The initial supported `modolia` executable is distributed by the repository flake. This keeps the Python library dependency-free while the CLI can use its validation dependencies and public schema/example assets.
+
+```bash
+nix run . -- --help
+nix run . -- --version
+```
+
+For resolution, the CLI requires an explicit `--registry`. The repository's synthetic registry is an example/test fixture only; the executable never silently chooses it for a deployment. A host must supply the registry it owns.
+
+The CLI reports release/package identity separately from resolver protocol identity:
+
+```text
+modolia 0.1.0 (resolver 0.1.0)
+```
+
+Public consumers should pin a reviewed release in their own `flake.lock`, for example after `v0.1.0` is published:
+
+```nix
+modolia = {
+  url = "github:hackelia-micrantha/modolia-community/v0.1.0";
+  inputs.nixpkgs.follows = "nixpkgs";
+};
+```
+
+The flake exposes `packages.<system>.modolia` and `apps.<system>.modolia` for `x86_64-linux` and `aarch64-linux`. Consumers should use this artifact rather than manufacturing local wrappers around repository scripts.
+
+## Validation
+
+Python quality/test checks run in CI, and the public Nix surface is validated with:
+
+```bash
+nix flake check --print-build-logs
+```
+
+Before a release tag is published, `flake.lock` must be committed so the public artifact has a reviewed Nix input pin rather than resolving a moving branch at install time.
+
 ## Security model
 
 Hard restrictions always run before preferences. Missing or uncertain authority must never broaden eligibility. Runtime adapters may narrow the resolver's eligible set, but must not reintroduce a rejected source.
@@ -62,7 +100,7 @@ Integrity records prove deterministic input/output binding, not publisher identi
 
 ## Repository relationship
 
-This public repository contains the reusable community core. Private deployment repositories may consume it while owning concrete inventories, policies, integrations, and operational state. See `docs/COMMUNITY_REPOSITORY.md`.
+This public repository contains the reusable community core. It is promoted deliberately from the private canonical Modolia repository rather than mirrored blindly. Private deployment repositories own concrete inventories, policies, integrations, and operational state. See `UPSTREAM.md` and `docs/COMMUNITY_REPOSITORY.md`.
 
 ## License
 

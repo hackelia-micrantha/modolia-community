@@ -50,3 +50,60 @@ jobs:
 
       - name: End-to-end tests
         run: pytest -q -m e2e tests/e2e
+
+  nix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@3138316df39ed29be04236d7ffc686fa525866aa # v23
+
+      - name: Verify committed Nix lock is stable
+        run: nix flake lock --no-update-lock-file
+
+      - name: Evaluate public flake
+        run: nix flake show --no-write-lock-file
+
+      - name: Build public package
+        run: nix build .#modolia --no-write-lock-file --print-build-logs
+
+      - name: Check installed CLI help
+        run: nix run .#modolia --no-write-lock-file -- --help
+
+      - name: Check installed CLI version
+        run: test "$(nix run .#modolia --no-write-lock-file -- --version)" = "modolia 0.1.0 (resolver 0.1.0)"
+
+      - name: Check installed CLI route
+        run: |
+          nix run .#modolia --no-write-lock-file -- \
+            examples/route-request.json \
+            examples/route-constraints.json \
+            --registry examples/model-surfaces.yaml \
+            > decision.json
+          test -s decision.json
+
+      - name: Build declared CLI contract
+        run: nix build .#checks.x86_64-linux.executable --no-write-lock-file --print-build-logs
+
+      - name: Run Nix static analysis contract
+        run: nix build .#checks.x86_64-linux.static-analysis --no-write-lock-file --print-build-logs
+
+      - name: Run Nix unit contract
+        run: nix build .#checks.x86_64-linux.unit --no-write-lock-file --print-build-logs
+
+      - name: Run Nix integration contract
+        run: nix build .#checks.x86_64-linux.integration --no-write-lock-file --print-build-logs
+
+      - name: Run Nix coverage contract
+        run: nix build .#checks.x86_64-linux.coverage --no-write-lock-file --print-build-logs
+
+      - name: Run Nix end-to-end contract
+        run: nix build .#checks.x86_64-linux.e2e --no-write-lock-file --print-build-logs
+
+      - name: Validate complete public flake
+        run: nix flake check --print-build-logs --no-write-lock-file
