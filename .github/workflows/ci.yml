@@ -41,7 +41,9 @@ jobs:
         run: pytest -q tests/unit
 
       - name: Integration tests
-        run: pytest -q -m integration tests/integration
+        run: |
+          pytest -q -m integration tests/integration
+          python scripts/validate-community-conformance.py
 
       - name: Coverage gate
         run: pytest -q --cov --cov-report=term-missing tests/unit tests/integration
