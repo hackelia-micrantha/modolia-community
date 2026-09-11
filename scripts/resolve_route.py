@@ -103,7 +103,7 @@ def resolve_files(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(prog="modolia", description=__doc__)
     parser.add_argument(
         "--version",
         action="version",
