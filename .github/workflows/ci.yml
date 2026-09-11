@@ -64,7 +64,25 @@ jobs:
       - name: Evaluate public flake
         run: nix flake show --no-write-lock-file
 
-      - name: Build package and CLI contract
+      - name: Build public package
+        run: nix build .#modolia --no-write-lock-file --print-build-logs
+
+      - name: Check installed CLI help
+        run: nix run .#modolia --no-write-lock-file -- --help
+
+      - name: Check installed CLI version
+        run: test "$(nix run .#modolia --no-write-lock-file -- --version)" = "modolia 0.1.0 (resolver 0.1.0)"
+
+      - name: Check installed CLI route
+        run: |
+          nix run .#modolia --no-write-lock-file -- \
+            examples/route-request.json \
+            examples/route-constraints.json \
+            --registry examples/model-surfaces.yaml \
+            > decision.json
+          test -s decision.json
+
+      - name: Build declared CLI contract
         run: nix build .#checks.x86_64-linux.executable --no-write-lock-file --print-build-logs
 
       - name: Run Nix static analysis contract
