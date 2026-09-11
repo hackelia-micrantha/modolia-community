@@ -22,9 +22,7 @@ python312Packages.buildPythonPackage {
     cat > $out/bin/modolia <<EOF
     #!${runtimePython}/bin/python
     import runpy
-    import sys
 
-    sys.argv[0] = "modolia"
     runpy.run_path("${../.}/scripts/resolve_route.py", run_name="__main__")
     EOF
     chmod +x $out/bin/modolia
