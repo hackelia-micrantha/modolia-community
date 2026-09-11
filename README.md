@@ -63,6 +63,8 @@ nix run . -- --help
 nix run . -- --version
 ```
 
+For resolution, the CLI requires an explicit `--registry`. The repository's synthetic registry is an example/test fixture only; the executable never silently chooses it for a deployment. A host must supply the registry it owns.
+
 The CLI reports release/package identity separately from resolver protocol identity:
 
 ```text
