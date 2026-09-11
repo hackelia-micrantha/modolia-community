@@ -15,4 +15,6 @@ Only reusable, classified material is promoted. Deployment configuration, concre
 
 Public contracts should preserve behavior and compatibility with the corresponding canonical implementation. Generalization is allowed for documentation and examples; it must not silently change resolver semantics or schema constraints.
 
+`conformance/public-v1` is the executable provenance/compatibility bridge for the current reusable resolver contract. Changes to that contract are reviewed in the public repository first, then consumed and revalidated by private Modolia; the fixture is not evidence that the repositories are mirrors.
+
 Unknown or ambiguously classified material stays private until reviewed.
