@@ -1,0 +1,14 @@
+{
+  "context_estimate": {
+    "input_tokens": 4000,
+    "max_output_tokens": 1000
+  },
+  "cost_preference": "prefer_free",
+  "request_id": "example-private-review",
+  "required_capabilities": [
+    "reasoning",
+    "code_review"
+  ],
+  "task": "code_review",
+  "timestamp": "2026-01-01T00:00:00Z"
+}
