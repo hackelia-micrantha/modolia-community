@@ -13,11 +13,13 @@
 
 - Canonical repository: `hackelia-micrantha/modolia`
 - Canonical CLI/release-contract PR: `#86`
-- Reviewed canonical merge commit: `d5ee965153716798a690d0c2f9339b2a930d4d14`
-- Public release preparation issue: `hackelia-micrantha/modolia-community#7`
-- Public release preparation PR: `#8`
+- Reviewed resolver/CLI contract merge: `d5ee965153716798a690d0c2f9339b2a930d4d14`
+- Canonical pre-tag validation correction PR: `#98`
+- Final reviewed canonical v0.1.0 validation baseline: `315a429485c6a3ef1603287effcddc5b2bcd8904`
+- Public release preparation issue/PR: `hackelia-micrantha/modolia-community#7` / `#8`
+- Public pre-tag validation correction issue/PR: `hackelia-micrantha/modolia-community#10` / `#11`
 
-The v0.1.0 public artifact promotes only the reusable resolver/CLI contract from the reviewed canonical revision. Concrete Dubnium registries, provider/runtime inventories, organization policy, credentials, generated runtime state, and private evidence remain outside the community release.
+The v0.1.0 public artifact promotes only the reusable resolver/CLI contract and deterministic validation correction from those reviewed canonical revisions. Concrete Dubnium registries, provider/runtime inventories, organization policy, credentials, generated runtime state, and private evidence remain outside the community release.
 
 ## Promotion policy
 
