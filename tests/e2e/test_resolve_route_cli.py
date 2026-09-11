@@ -34,9 +34,7 @@ def test_resolve_route_cli_reports_package_and_resolver_versions() -> None:
     )
 
     assert result.returncode == 0, result.stderr
-    assert result.stdout.strip() == (
-        f"resolve_route.py {package_version()} (resolver {RESOLVER_VERSION})"
-    )
+    assert result.stdout.strip() == f"modolia {package_version()} (resolver {RESOLVER_VERSION})"
 
 
 def test_resolve_route_cli_requires_explicit_registry() -> None:
