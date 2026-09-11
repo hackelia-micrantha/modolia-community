@@ -61,5 +61,26 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@3138316df39ed29be04236d7ffc686fa525866aa # v23
 
-      - name: Validate public flake and CLI artifact
+      - name: Evaluate public flake
+        run: nix flake show --no-write-lock-file
+
+      - name: Build package and CLI contract
+        run: nix build .#checks.x86_64-linux.executable --no-write-lock-file --print-build-logs
+
+      - name: Run Nix static analysis contract
+        run: nix build .#checks.x86_64-linux.static-analysis --no-write-lock-file --print-build-logs
+
+      - name: Run Nix unit contract
+        run: nix build .#checks.x86_64-linux.unit --no-write-lock-file --print-build-logs
+
+      - name: Run Nix integration contract
+        run: nix build .#checks.x86_64-linux.integration --no-write-lock-file --print-build-logs
+
+      - name: Run Nix coverage contract
+        run: nix build .#checks.x86_64-linux.coverage --no-write-lock-file --print-build-logs
+
+      - name: Run Nix end-to-end contract
+        run: nix build .#checks.x86_64-linux.e2e --no-write-lock-file --print-build-logs
+
+      - name: Validate complete public flake
         run: nix flake check --print-build-logs --no-write-lock-file
