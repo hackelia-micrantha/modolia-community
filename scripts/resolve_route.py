@@ -111,7 +111,7 @@ def main() -> int:
     )
     parser.add_argument("request", type=Path)
     parser.add_argument("constraints", type=Path)
-    parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY)
+    parser.add_argument("--registry", type=Path, required=True)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
