@@ -61,21 +61,34 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@3138316df39ed29be04236d7ffc686fa525866aa # v23
 
+      # Temporary release-preparation step. The artifact is reviewed and committed
+      # through normal repository writes; CI retains read-only repository permission.
+      - name: Generate candidate release lock
+        run: nix flake lock
+
+      - name: Upload candidate release lock
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: candidate-flake-lock
+          path: flake.lock
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Evaluate public flake
-        run: nix flake show --no-write-lock-file
+        run: nix flake show
 
       - name: Build public package
-        run: nix build .#modolia --no-write-lock-file --print-build-logs
+        run: nix build .#modolia --print-build-logs
 
       - name: Check installed CLI help
-        run: nix run .#modolia --no-write-lock-file -- --help
+        run: nix run .#modolia -- --help
 
       - name: Check installed CLI version
-        run: test "$(nix run .#modolia --no-write-lock-file -- --version)" = "modolia 0.1.0 (resolver 0.1.0)"
+        run: test "$(nix run .#modolia -- --version)" = "modolia 0.1.0 (resolver 0.1.0)"
 
       - name: Check installed CLI route
         run: |
-          nix run .#modolia --no-write-lock-file -- \
+          nix run .#modolia -- \
             examples/route-request.json \
             examples/route-constraints.json \
             --registry examples/model-surfaces.yaml \
@@ -83,22 +96,22 @@ jobs:
           test -s decision.json
 
       - name: Build declared CLI contract
-        run: nix build .#checks.x86_64-linux.executable --no-write-lock-file --print-build-logs
+        run: nix build .#checks.x86_64-linux.executable --print-build-logs
 
       - name: Run Nix static analysis contract
-        run: nix build .#checks.x86_64-linux.static-analysis --no-write-lock-file --print-build-logs
+        run: nix build .#checks.x86_64-linux.static-analysis --print-build-logs
 
       - name: Run Nix unit contract
-        run: nix build .#checks.x86_64-linux.unit --no-write-lock-file --print-build-logs
+        run: nix build .#checks.x86_64-linux.unit --print-build-logs
 
       - name: Run Nix integration contract
-        run: nix build .#checks.x86_64-linux.integration --no-write-lock-file --print-build-logs
+        run: nix build .#checks.x86_64-linux.integration --print-build-logs
 
       - name: Run Nix coverage contract
-        run: nix build .#checks.x86_64-linux.coverage --no-write-lock-file --print-build-logs
+        run: nix build .#checks.x86_64-linux.coverage --print-build-logs
 
       - name: Run Nix end-to-end contract
-        run: nix build .#checks.x86_64-linux.e2e --no-write-lock-file --print-build-logs
+        run: nix build .#checks.x86_64-linux.e2e --print-build-logs
 
       - name: Validate complete public flake
-        run: nix flake check --print-build-logs --no-write-lock-file
+        run: nix flake check --print-build-logs
