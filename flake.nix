@@ -52,6 +52,7 @@
             pythonPackages.pytest
             pythonPackages.pytest-cov
             pythonPackages.pyyaml
+            pythonPackages.rfc3339-validator
           ]);
         in
         {
@@ -67,6 +68,18 @@
               --registry ${./examples/model-surfaces.yaml} \
               > decision.json
             test -s decision.json
+
+            sed 's/"timestamp": "[^"]*"/"timestamp": "not-a-date"/' \
+              ${./examples/route-request.json} > invalid-request.json
+            if ${self.packages.${system}.modolia}/bin/modolia \
+              invalid-request.json \
+              ${./examples/route-constraints.json} \
+              --registry ${./examples/model-surfaces.yaml} \
+              > /dev/null 2>&1; then
+              echo "installed modolia accepted an invalid RFC3339 timestamp" >&2
+              exit 1
+            fi
+
             mkdir -p $out
             cp decision.json $out/decision.json
           '';
@@ -157,6 +170,7 @@
                 pythonPackages.pytest
                 pythonPackages.pytest-cov
                 pythonPackages.pyyaml
+                pythonPackages.rfc3339-validator
               ]))
             ];
           };

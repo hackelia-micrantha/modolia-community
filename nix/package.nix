@@ -4,6 +4,7 @@ let
   runtimePython = python312Packages.python.withPackages (pythonPackages: [
     pythonPackages.jsonschema
     pythonPackages.pyyaml
+    pythonPackages.rfc3339-validator
   ]);
 in
 python312Packages.buildPythonPackage {
