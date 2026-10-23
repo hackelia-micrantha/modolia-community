@@ -98,6 +98,10 @@ Hard restrictions always run before preferences. Missing or uncertain authority 
 
 Integrity records prove deterministic input/output binding, not publisher identity or execution authorization. See `docs/threat-model.md`.
 
+## Documentation maintenance
+
+The public reusable resolver adopts the [shared Micrantha documentation-sync process](docs/documentation-maintenance.md). Its project-owned maintenance contract records public/private authority, release and routing-security claim limits, the conformance/CI commands, and the distinction between a buildable flake and a published consumer artifact.
+
 ## Repository relationship
 
 This public repository contains the reusable community core. It is promoted deliberately from the private canonical Modolia repository rather than mirrored blindly. Private deployment repositories own concrete inventories, policies, integrations, and operational state. See `UPSTREAM.md` and `docs/COMMUNITY_REPOSITORY.md`.
