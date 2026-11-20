@@ -1,6 +1,6 @@
 # Documentation maintenance contract
 
-**Adoption:** The [Micrantha shared documentation-sync skill](https://github.com/hackelia-micrantha/.github/blob/main/skills/documentation-sync/SKILL.md), unchanged. This document records Modolia-specific publication authority, validation, and claim discipline; it does not duplicate the shared skill.
+**Adoption:** [Micrantha documentation standard](https://github.com/hackelia-micrantha/.github/blob/main/docs/standards/documentation.md), including public-claim consistency. This document records Modolia-specific publication authority, validation, and claim discipline; it does not duplicate the shared standard.
 
 ## Source and contract authority
 
@@ -47,6 +47,6 @@ Source/packaging checks do not substitute for a live public artifact/anonymous c
 
 ## Event-driven maintenance and decisions
 
-Re-evaluate README and contracts when the public resolver, schema namespace, conformance fixture, CLI package/name/version, release tag, or private-to-public publication boundary changes. Reconcile provider/runtime capability claims with the owning implementation rather than importing deployment facts into public examples. Maintain the shared `DOC-Q*` human decision queue for unsupported security, license, release, or public/private claim decisions.
+Re-evaluate README and contracts when the public resolver, schema namespace, conformance fixture, CLI package/name/version, release tag, or private-to-public publication boundary changes. Reconcile provider/runtime capability claims with the owning implementation rather than importing deployment facts into public examples. Refer unresolved security, license, release, or public/private claim decisions to the accountable maintainer before publication.
 
-A documentation PR does not authorize a release, private-source publication, signing, deployment, or changing governance authority. No further shared-skill specialization is currently needed.
+A documentation PR does not authorize a release, private-source publication, signing, deployment, or changing governance authority.
